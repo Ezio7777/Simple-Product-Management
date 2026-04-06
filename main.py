@@ -4,6 +4,7 @@ from models import Product
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
 import database_models
+from ai_handler import get_warehouse_advice
 
 app = FastAPI()
 
@@ -86,7 +87,7 @@ def update_product(id : int, product: Product, db:Session = Depends(get_db)):
     
  
 @app.delete("/products/{id}") 
-def update_product(id:int, db:Session = Depends(get_db)):
+def delete_product(id:int, db:Session = Depends(get_db)):
     db_product = db.query(database_models.Product).filter(database_models.Product.id == id).first()
     if db_product :
         db.delete(db_product)
@@ -94,3 +95,19 @@ def update_product(id:int, db:Session = Depends(get_db)):
         return "Success Fully Deleted"
     else:
         return "Product Not Found"    
+    
+
+@app.post("/ai/chat")
+def chat_with_inventory(request: dict, db: Session = Depends(get_db)):
+    user_message = request.get("message")
+
+    all_products = db.query(database_models.Product).all()
+
+    inventory_context = [
+        {"name": p.name, "quantity": p.quantity, "price": p.price} 
+        for p in all_products
+    ]
+
+    ai_response = get_warehouse_advice(user_message, inventory_context)
+    
+    return {"reply": ai_response}

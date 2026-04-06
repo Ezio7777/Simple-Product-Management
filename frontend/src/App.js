@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import axios from "axios";
 import "./App.css";
 import TaglineSection from "./TaglineSection";
+import Chatbot from "./Chatbot";
 
 const api = axios.create({ baseURL: "http://localhost:8000" });
 
@@ -13,6 +14,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState({ field: "id", dir: "asc" });
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -165,6 +167,14 @@ function App() {
           </div>
         </section>
       </main>
+
+      <button 
+        className="chat-toggle-btn" 
+        onClick={() => setIsChatOpen(true)}
+      >
+        💬 Ask AI
+      </button>
+      <Chatbot isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 }
